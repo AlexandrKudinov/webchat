@@ -10,58 +10,47 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.sql.DataSource;
-
 
 @Configuration
 @EnableWebSecurity
-public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	// add a reference to our security data source
     @Autowired
     private UserService userService;
-
+	
     @Autowired
     private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-
+    
    @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
-
     }
-
-//	@Override
-//	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//		auth.jdbcAuthentication().dataSource(securityDataSource);
-//	}
-
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
 		http.authorizeRequests()
-			//.antMatchers("/").permitAll().anyRequest().authenticated()
+			.antMatchers("/").hasRole("EMPLOYEE")
+			.antMatchers("/leaders/**").hasRole("MANAGER")
+			.antMatchers("/systems/**").hasRole("ADMIN")
 			.and()
-				.formLogin()
+			.formLogin()
 				.loginPage("/showMyLoginPage")
 				.loginProcessingUrl("/authenticateTheUser")
-			.successHandler(customAuthenticationSuccessHandler)
+				.successHandler(customAuthenticationSuccessHandler)
 				.permitAll()
 			.and()
 			.logout().permitAll()
 			.and()
 			.exceptionHandling().accessDeniedPage("/access-denied");
-
 	}
 	
 	//beans
 	//bcrypt bean definition
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
-		BCryptPasswordEncoder bCryptPasswordEncoder =  new BCryptPasswordEncoder();
-		return bCryptPasswordEncoder;
+		return new BCryptPasswordEncoder();
 	}
 
 	//authenticationProvider bean definition
@@ -72,9 +61,7 @@ public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.setPasswordEncoder(passwordEncoder()); //set the password encoder - bcrypt
 		return auth;
 	}
-
-
-
+	  
 }
 
 

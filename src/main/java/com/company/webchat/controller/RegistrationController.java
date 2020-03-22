@@ -4,9 +4,6 @@ import java.util.logging.Logger;
 
 import javax.validation.Valid;
 
-import com.company.webchat.entity.User;
-import com.company.webchat.service.UserService;
-import com.company.webchat.user.CrmUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.stereotype.Controller;
@@ -18,6 +15,10 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.company.webchat.user.CrmUser;
+import com.company.webchat.entity.User;
+import com.company.webchat.service.UserService;
 
 @Controller
 @RequestMapping("/register")
@@ -53,12 +54,12 @@ public class RegistrationController {
 		String userName = theCrmUser.getUserName();
 		logger.info("Processing registration form for: " + userName);
 		
-		// form validation
+
 		 if (theBindingResult.hasErrors()){
 			 return "registration-form";
 	        }
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		// check the database if user already exists
+
+
         User existing = userService.findByUserName(userName);
         if (existing != null){
         	theModel.addAttribute("crmUser", new CrmUser());
@@ -67,10 +68,10 @@ public class RegistrationController {
 			logger.warning("User name already exists.");
         	return "registration-form";
         }
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-     // create user account        						
+        
+
         userService.save(theCrmUser);
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        
         logger.info("Successfully created user: " + userName);
         
         return "registration-confirmation";		

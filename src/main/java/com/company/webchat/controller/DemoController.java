@@ -8,11 +8,10 @@ public class DemoController {
 
 	@GetMapping("/")
 	public String showHome() {
-
-		return "fancy-login";
+		
+		return "home";
 	}
 	
-	// add request mapping for /leaders
 
 	
 }
