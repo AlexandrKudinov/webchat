@@ -1,73 +1,54 @@
 package com.company.webchat.service;
 
-import com.company.webchat.dao.RoleDao;
 import com.company.webchat.dao.UserDao;
-import com.company.webchat.entity.Role;
 import com.company.webchat.entity.User;
 import com.company.webchat.user.CrmUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Autowired
+    private UserDao userDao;
 
-	@Autowired
-	private UserDao userDao;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
-	@Autowired
-	private RoleDao roleDao;
-	
-	@Autowired
-	private BCryptPasswordEncoder passwordEncoder;
+    @Override
+    @Transactional
+    public User findByUserName(String userName) {
+        return userDao.findByUserName(userName);
+    }
 
-	@Override
-	@Transactional
-	public User findByUserName(String userName) {
+    @Override
+    @Transactional
+    public void save(CrmUser crmUser) {
+        User user = new User();
+        user.setUserName(crmUser.getUserName());
+        user.setPassword(passwordEncoder.encode(crmUser.getPassword()));
+        user.setFirstName(crmUser.getFirstName());
+        user.setLastName(crmUser.getLastName());
+        user.setEmail(crmUser.getEmail());
+        userDao.save(user);
+    }
 
-		return userDao.findByUserName(userName);
-	}
-
-	@Override
-	@Transactional
-	public void save(CrmUser crmUser) {
-		User user = new User();
-
-		user.setUserName(crmUser.getUserName());
-		user.setPassword(passwordEncoder.encode(crmUser.getPassword()));
-		user.setFirstName(crmUser.getFirstName());
-		user.setLastName(crmUser.getLastName());
-		user.setEmail(crmUser.getEmail());
-
-
-		user.setRoles(Arrays.asList(roleDao.findRoleByName("ROLE_EMPLOYEE")));
-
-
-		userDao.save(user);
-	}
-
-	@Override
-	@Transactional
-	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-		User user = userDao.findByUserName(userName);
-		if (user == null) {
-			throw new UsernameNotFoundException("Invalid username or password.");
-		}
-		return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(),
-				mapRolesToAuthorities(user.getRoles()));
-	}
-
-	private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
-		return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
-	}
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        User user = userDao.findByUserName(userName);
+        if (user == null) {
+            throw new UsernameNotFoundException("Invalid username or password.");
+        }
+        return org.springframework.security.core.userdetails.User
+                .builder()
+                .username(user.getUserName())
+                .password(user.getPassword())
+                .roles("USER")
+                .build();
+    }
 }
