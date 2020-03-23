@@ -1,13 +1,13 @@
-var usernamePage = document.querySelector('#username-page');
-var chatPage = document.querySelector('#chat-page');
-var usernameForm = document.querySelector('#usernameForm');
-var messageForm = document.querySelector('#messageForm');
-var messageInput = document.querySelector('#message');
-var messageArea = document.querySelector('#messageArea');
-var connectingElement = document.querySelector('.connecting');
+let usernamePage = document.querySelector('#username-page');
+let chatPage = document.querySelector('#chat-page');
+let usernameForm = document.querySelector('#usernameForm');
+let messageForm = document.querySelector('#messageForm');
+let messageInput = document.querySelector('#message');
+let messageArea = document.querySelector('#messageArea');
+let connectingElement = document.querySelector('.connecting');
 
-var stompClient = null;
-var username = null;
+let stompClient = null;
+let username = null;
 
 
 function connect(event) {
@@ -32,14 +32,6 @@ function onConnected() {
         {},
         JSON.stringify({sender: username})
     )
-
-    // let data = JSON.parse(event.data);
-    //
-    // for (let i = 0; i < data.length; i++) {
-    //     let {coords, flag} = data[i];
-    //     send(data[i])
-    // }
-
     connectingElement.classList.add('hidden');
 }
 
@@ -51,9 +43,9 @@ function onError(error) {
 
 
 function send(event) {
-    var messageContent = messageInput.value.trim();
+    let messageContent = messageInput.value.trim();
     if (messageContent && stompClient) {
-        var chatMessage = {
+        let chatMessage = {
             sender: username,
             content: messageInput.value
         };
@@ -65,36 +57,27 @@ function send(event) {
 
 
 function onMessageReceived(payload) {
-    var message = JSON.parse(payload.body);
-
-    console.log(message);
-    if(message.length>1){
+    let message = JSON.parse(payload.body);
+    if (message.length > 1) {
         for (let i = 0; i < message.length; i++) {
-            var messageElement1 = document.createElement('li');
-            messageElement1.classList.add('chat-message');
-            var usernameElement1 = document.createElement('span');
-            var usernameText1 = document.createTextNode(message[i].user.userName);
-            usernameElement1.appendChild(usernameText1);
-            messageElement1.appendChild(usernameElement1);
-            var textElement1 = document.createElement('p');
-            var messageText1 = document.createTextNode(message[i].content);
-            textElement1.appendChild(messageText1);
-            messageElement1.appendChild(textElement1);
-            messageArea.appendChild(messageElement1);
-            messageArea.scrollTop = messageArea.scrollHeight;
-            }
+            showMessage(message[i]);
+        }
+    } else {
+        showMessage(message)
 
     }
+}
 
-    console.log("message received");
-    var messageElement = document.createElement('li');
+
+function showMessage(message) {
+    let messageElement = document.createElement('li');
     messageElement.classList.add('chat-message');
-    var usernameElement = document.createElement('span');
-    var usernameText = document.createTextNode(message.user.userName);
+    let usernameElement = document.createElement('span');
+    let usernameText = document.createTextNode(message.user.userName);
     usernameElement.appendChild(usernameText);
     messageElement.appendChild(usernameElement);
-    var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.content);
+    let textElement = document.createElement('p');
+    let messageText = document.createTextNode(message.content);
     textElement.appendChild(messageText);
     messageElement.appendChild(textElement);
     messageArea.appendChild(messageElement);
